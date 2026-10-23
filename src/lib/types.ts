@@ -60,6 +60,7 @@ export interface DailyForecast {
 }
 
 export interface PeriodSummary {
+    remainingEnergyKwh: number;
     energyKwh: number;
     complete: boolean;
 }

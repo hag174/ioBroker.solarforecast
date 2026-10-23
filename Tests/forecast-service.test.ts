@@ -149,6 +149,165 @@ describe('ForecastService', () => {
         expect(snapshot.currentWeek.complete).to.equal(true);
     });
 
+    for (const { name, now, start, end, expected } of [
+        {
+            name: 'prorates the current hour and excludes past hours and the next month',
+            now: '2026-03-31T10:30:00Z',
+            start: '2026-03-01',
+            end: '2026-04-02',
+            expected: 2.53,
+        },
+        {
+            name: 'includes the full current hour at its start',
+            now: '2026-03-31T10:00:00Z',
+            start: '2026-03-01',
+            end: '2026-04-02',
+            expected: 2.64,
+        },
+        {
+            name: 'uses only the available forecast when month end is out of range',
+            now: '2026-03-01T10:30:00Z',
+            start: '2026-02-01',
+            end: '2026-03-16',
+            expected: 81.95,
+        },
+        {
+            name: 'returns zero when all available hours are in the past',
+            now: '2026-03-31T22:00:00Z',
+            start: '2026-03-01',
+            end: '2026-03-31',
+            expected: 0,
+        },
+        {
+            name: 'uses the configured timezone at a local month boundary',
+            now: '2026-03-31T22:00:00Z',
+            start: '2026-03-01',
+            end: '2026-04-01',
+            expected: 5.28,
+        },
+    ]) {
+        it(name, async () => {
+            clock.setSystemTime(new Date(now));
+            const service = new ForecastService({
+                geocode: sinon.stub(),
+                fetchForecast: sinon.stub().resolves(createHourlyResponse(start, end)),
+            });
+            const snapshot = await service.fetchSnapshot({
+                ...baseConfig,
+                locationMode: 'manual',
+                latitude: 52.52,
+                longitude: 13.405,
+                timezoneMode: 'manual',
+                timeZone: 'Europe/Berlin',
+            });
+
+            expect(snapshot.currentMonth).to.have.property('remainingEnergyKwh', expected);
+        });
+    }
+
+    for (const { now, expected } of [
+        { now: '2026-10-25T00:30:00Z', expected: 0.55 },
+        { now: '2026-10-25T01:30:00Z', expected: 0.33 },
+    ]) {
+        it(`counts only future hours during DST fallback at ${now}`, async () => {
+            clock.setSystemTime(new Date(now));
+            const service = new ForecastService({
+                geocode: sinon.stub(),
+                fetchForecast: sinon.stub().resolves({
+                    timezone: 'Europe/Berlin',
+                    hourly: {
+                        time: ['2026-10-25T01:00', '2026-10-25T02:00', '2026-10-25T02:00', '2026-10-25T03:00'],
+                        global_tilted_irradiance: [100, 100, 100, 100],
+                        cloud_cover: [20, 20, 20, 20],
+                    },
+                }),
+            });
+            const snapshot = await service.fetchSnapshot({
+                ...baseConfig,
+                locationMode: 'manual',
+                latitude: 52.52,
+                longitude: 13.405,
+                timezoneMode: 'manual',
+                timeZone: 'Europe/Berlin',
+            });
+
+            expect(snapshot.currentMonth).to.have.property('remainingEnergyKwh', expected);
+        });
+    }
+
+    it('handles a two-hour DST rollback in the configured timezone', async () => {
+        clock.setSystemTime(new Date('2026-10-25T01:30:00Z'));
+        const service = new ForecastService({
+            geocode: sinon.stub(),
+            fetchForecast: sinon.stub().resolves({
+                hourly: {
+                    time: ['00', '01', '02', '01', '02', '03'].map(hour => `2026-10-25T${hour}:00`),
+                    global_tilted_irradiance: [100, 100, 100, 100, 100, 100],
+                    cloud_cover: [20, 20, 20, 20, 20, 20],
+                },
+            }),
+        });
+        const snapshot = await service.fetchSnapshot({
+            ...baseConfig,
+            locationMode: 'manual',
+            latitude: -72,
+            longitude: 2,
+            timezoneMode: 'manual',
+            timeZone: 'Antarctica/Troll',
+        });
+
+        expect(snapshot.currentMonth.remainingEnergyKwh).to.equal(0.55);
+    });
+
+    for (const { name, now, start, end, expected } of [
+        {
+            name: 'prorates the remaining Sunday and excludes the next week',
+            now: '2026-03-22T10:30:00Z',
+            start: '2026-03-01',
+            end: '2026-03-31',
+            expected: 2.75,
+        },
+        {
+            name: 'starts a new remaining week at local Monday midnight',
+            now: '2026-03-22T23:00:00Z',
+            start: '2026-03-01',
+            end: '2026-03-31',
+            expected: 36.96,
+        },
+        {
+            name: 'includes next-month hours belonging to the current week',
+            now: '2026-03-31T10:30:00Z',
+            start: '2026-03-01',
+            end: '2026-04-10',
+            expected: 28.93,
+        },
+        {
+            name: 'limits the remaining week to the available forecast',
+            now: '2026-03-20T10:30:00Z',
+            start: '2026-03-01',
+            end: '2026-03-20',
+            expected: 2.75,
+        },
+    ]) {
+        it(name, async () => {
+            clock.setSystemTime(new Date(now));
+            const service = new ForecastService({
+                geocode: sinon.stub(),
+                fetchForecast: sinon.stub().resolves(createHourlyResponse(start, end)),
+            });
+            const snapshot = await service.fetchSnapshot({
+                ...baseConfig,
+                locationMode: 'manual',
+                latitude: 52.52,
+                longitude: 13.405,
+                timezoneMode: 'manual',
+                timeZone: 'Europe/Berlin',
+            });
+
+            expect(snapshot.currentWeek).to.have.property('remainingEnergyKwh', expected);
+        });
+    }
+
     it('skips geocoding in manual mode', async () => {
         const geocodeStub = sinon.stub();
         const forecastStub = sinon.stub().resolves(createHourlyResponse('2026-03-01', '2026-03-31'));

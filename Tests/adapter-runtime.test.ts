@@ -74,10 +74,12 @@ function createSnapshot(hourly?: ForecastRow[]): ForecastSnapshot {
         todayEnergyKwh: 6.75,
         todayRemainingEnergyKwh: 4.25,
         currentWeek: {
+            remainingEnergyKwh: 7.8,
             energyKwh: 32.4,
             complete: true,
         },
         currentMonth: {
+            remainingEnergyKwh: 51.7,
             energyKwh: 109.2,
             complete: false,
         },
@@ -198,7 +200,11 @@ describe('AdapterRuntime', () => {
         expect(host.getObject('summary.today.energy_kwh')?.common.role).to.equal('value.power.consumption');
         expect(host.getObject('summary.today.remaining_energy_kwh')?.common.role).to.equal('value.power.consumption');
         expect(host.getObject('summary.currentWeek.energy_kwh')?.common.role).to.equal('value.power.consumption');
+        expect(host.getObject('summary.currentWeek.remaining_energy')?.common.unit).to.equal('kWh');
+        expect(host.getState('summary.currentWeek.remaining_energy')?.val).to.equal(7.8);
         expect(host.getObject('summary.currentMonth.energy_kwh')?.common.role).to.equal('value.power.consumption');
+        expect(host.getObject('summary.currentMonth.remaining_energy')?.common.unit).to.equal('kWh');
+        expect(host.getState('summary.currentMonth.remaining_energy')?.val).to.equal(51.7);
         expect(host.getObject('forecast.daily.day0.energy_kwh')?.common.role).to.equal('value.power.consumption');
         expect(host.getObject('forecast.hourly.timestamps.2026_03_21T10_00.energy_kwh')?.common.role).to.equal(
             'value.power.consumption',

@@ -22,4 +22,7 @@ This project implements a solar forecast adapter for ioBroker using the Open-Met
 - Energy forecast states use the ioBroker role `value.power.consumption`.
 - `forecast.json.hourlyToday`, `forecast.json.hourlyTomorrow`, and `forecast.json.daily` now publish Material Design JSON Chart payloads with `axisLabels` and `graphs`.
 - The former combined `forecast.json.hourly` state and the raw-array JSON format have been removed as breaking changes.
+- `summary.currentMonth.remaining_energy` publishes remaining forecast energy in kWh at refresh time, with the current hour prorated and the range capped at the local month end and available forecast. Measured production is added externally by the user. The summary JSON exposes `currentMonth.remainingEnergyKwh`; existing monthly totals and completeness semantics are unchanged.
+- `summary.currentWeek.remaining_energy` uses the same remaining-energy calculation through the end of the local ISO week (Sunday), including next-month days when necessary. The summary JSON exposes `currentWeek.remainingEnergyKwh`; weekly totals and completeness semantics are unchanged.
+- Version `0.8.0` adds weekly/monthly remaining-energy states. Tagged `v*` releases are published by the GitHub Actions release job only after all CI checks succeed.
 - The preferred full verification flow is `npm run verify`.

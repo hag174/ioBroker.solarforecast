@@ -85,10 +85,22 @@ export class ForecastService {
             todayEnergyKwh: daily[0]?.energyKwh ?? 0,
             todayRemainingEnergyKwh: this.sumRemainingTodayEnergy(allRows, today, currentHour),
             currentWeek: {
+                remainingEnergyKwh: this.sumRemainingEnergyForRange(
+                    allRows,
+                    currentDate,
+                    effectiveTimeZone,
+                    weekRange.endDate,
+                ),
                 energyKwh: this.sumEnergyForRange(allRows, weekRange.startDate, weekRange.endDate),
                 complete: this.isRangeComplete(allRows, weekRange.startDate, weekRange.endDate),
             },
             currentMonth: {
+                remainingEnergyKwh: this.sumRemainingEnergyForRange(
+                    allRows,
+                    currentDate,
+                    effectiveTimeZone,
+                    monthRange.endDate,
+                ),
                 energyKwh: this.sumEnergyForRange(allRows, monthRange.startDate, monthRange.endDate),
                 complete: this.isRangeComplete(allRows, monthRange.startDate, monthRange.endDate),
             },
@@ -153,6 +165,50 @@ export class ForecastService {
         const totalEnergy = rows
             .filter(row => row.localDate >= startDate && row.localDate <= endDate)
             .reduce((sum, row) => sum + row.energyKwh, 0);
+
+        return roundNumber(totalEnergy);
+    }
+
+    private sumRemainingEnergyForRange(rows: ForecastRow[], now: Date, timeZone: string, endDate: string): number {
+        const currentTimestamp = `${formatLocalDate(now, timeZone)}T${formatLocalHour(now, timeZone)}`;
+        let startIndex = rows.findIndex(row => row.timestamp >= currentTimestamp);
+        if (startIndex < 0) {
+            return 0;
+        }
+
+        // During DST fallback, skip the first occurrence if we are in the repeated hour.
+        const isRepeatedHour = [1, 2].some(hoursAgo => {
+            const previousHour = new Date(now.getTime() - hoursAgo * 60 * 60 * 1000);
+            return (
+                `${formatLocalDate(previousHour, timeZone)}T${formatLocalHour(previousHour, timeZone)}` ===
+                currentTimestamp
+            );
+        });
+        if (isRepeatedHour && rows[startIndex].timestamp === currentTimestamp) {
+            const repeatedIndex = rows.findIndex(
+                (row, index) => index > startIndex && row.timestamp === currentTimestamp,
+            );
+            if (repeatedIndex >= 0) {
+                startIndex = repeatedIndex;
+            }
+        }
+
+        const parts = new Intl.DateTimeFormat('en-GB', {
+            timeZone,
+            minute: '2-digit',
+            second: '2-digit',
+        }).formatToParts(now);
+        const minute = Number(parts.find(part => part.type === 'minute')?.value ?? 0);
+        const second = Number(parts.find(part => part.type === 'second')?.value ?? 0);
+        const remainingFraction = 1 - (minute * 60 + second + now.getUTCMilliseconds() / 1000) / 3600;
+        const totalEnergy = rows
+            .slice(startIndex)
+            .filter(row => row.localDate <= endDate)
+            .reduce(
+                (sum, row, index) =>
+                    sum + row.energyKwh * (index === 0 && row.timestamp === currentTimestamp ? remainingFraction : 1),
+                0,
+            );
 
         return roundNumber(totalEnergy);
     }
