@@ -108,6 +108,10 @@ Project-specific unit tests live in `Tests/`. Template package and integration t
 
 ## Changelog
 
+### 0.8.1
+
+- Added remaining week/month forecasts from 0.8.0 and pinned the integration test controller to 7.2.2 for compatibility with Node.js 20 CI jobs.
+
 ### 0.8.0
 
 - Added `summary.currentWeek.remaining_energy` and `summary.currentMonth.remaining_energy` in kWh, with proportional current-hour energy and local week/month boundaries.
