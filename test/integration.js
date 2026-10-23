@@ -125,6 +125,8 @@ async function configureAdapter(harness) {
 
 // Run integration tests - See https://github.com/ioBroker/testing for a detailed explanation and further options
 tests.integration(path.join(__dirname, '..'), {
+    // Keep the test controller compatible with the supported Node.js 20 CI jobs.
+    controllerVersion: '7.2.2',
     defineAdditionalTests({ suite }) {
         suite('Publishes forecast states', (getHarness) => {
             let harness;

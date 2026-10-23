@@ -26,3 +26,5 @@ This project implements a solar forecast adapter for ioBroker using the Open-Met
 - `summary.currentWeek.remaining_energy` uses the same remaining-energy calculation through the end of the local ISO week (Sunday), including next-month days when necessary. The summary JSON exposes `currentWeek.remainingEnergyKwh`; weekly totals and completeness semantics are unchanged.
 - Version `0.8.0` adds weekly/monthly remaining-energy states. Tagged `v*` releases are published by the GitHub Actions release job only after all CI checks succeed.
 - The preferred full verification flow is `npm run verify`.
+
+- Release follow-up: the default dev test controller requires Node.js >=22.19.0 and broke the Node.js 20 CI job before database initialization. Version `0.8.1` pins the integration test controller to `7.2.2` (supports Node.js >=18). Version `0.8.0` was installed and both remaining-energy states and connection were verified live; its tag is retained unchanged.

@@ -1,8 +1,21 @@
 {
     "common": {
         "name": "solarforecast",
-        "version": "0.8.0",
+        "version": "0.8.1",
         "news": {
+            "0.8.1": {
+                "en": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility.",
+                "de": "Test-Controller für die Node.js-20-Kompatibilität auf Version 7.2.2 fixiert.",
+                "ru": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility.",
+                "pt": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility.",
+                "nl": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility.",
+                "fr": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility.",
+                "it": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility.",
+                "es": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility.",
+                "pl": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility.",
+                "uk": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility.",
+                "zh-cn": "Pinned the integration test controller to 7.2.2 for Node.js 20 compatibility."
+            },
             "0.8.0": {
                 "en": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
                 "de": "Restenergie-Prognosen für die aktuelle Woche und den aktuellen Monat ergänzt, einschließlich des zeitanteiligen Rests der laufenden Stunde.",
