@@ -105,3 +105,13 @@ tags:
 - Added a dedicated admin message handler that accepts only admin-originated `resolveLocationConfig` requests, validates payload lengths and formats, enforces a `10000 ms` timeout, and throttles repeated requests for `1000 ms`.
 - Updated all `*.energy_kwh` objects to use the ioBroker role `value.power.consumption`.
 - Added `npm run verify`, a JS-Controller preflight wrapper for `npm run test:integration`, an explicit CI integration-test job, and a governance consistency test that detects legacy names and stale memory terms.
+
+## Release 0.8.1 deployment — 2026-10-23
+
+- Added `summary.currentWeek.remaining_energy` and `summary.currentMonth.remaining_energy` in kWh, including proportional remaining current-hour energy and the local calendar cutoff. Both values are also mirrored in the summary JSON.
+- Published immutable Git tags `v0.8.0` and `v0.8.1` to `hag174/ioBroker.solarforecast`; updated the local origin URL after GitHub reported the repository rename.
+- Added a GitHub Actions release job that creates the GitHub Release only after all tagged CI jobs succeed.
+- The first tag exposed a test infrastructure incompatibility: the default dev JS-Controller now requires Node.js >=22.19.0. Version 0.8.1 pins the integration test controller to 7.2.2, which supports Node.js >=18; product runtime is unchanged from 0.8.0.
+- Local type checking, 54 TypeScript tests, 57 package tests and the build passed. All nine GitHub adapter-test jobs (Node.js 20/22/24 on Linux/macOS/Windows), check/lint, and the dedicated integration test passed.
+- Installed version 0.8.1 from its exact GitHub tag in `/opt/iobroker` and restarted only `solarforecast.0`. Verified instance metadata version 0.8.1, enabled/alive true, `info.connection` true, empty `info.lastError`, and numeric values for both new remaining-energy states.
+- GitHub Release `v0.8.1` was published successfully: https://github.com/hag174/ioBroker.solarforecast/releases/tag/v0.8.1 . No release or deployment steps remain open.
