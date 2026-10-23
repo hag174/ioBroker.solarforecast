@@ -77,10 +77,22 @@ class ForecastService {
       todayEnergyKwh: (_b = (_a = daily[0]) == null ? void 0 : _a.energyKwh) != null ? _b : 0,
       todayRemainingEnergyKwh: this.sumRemainingTodayEnergy(allRows, today, currentHour),
       currentWeek: {
+        remainingEnergyKwh: this.sumRemainingEnergyForRange(
+          allRows,
+          currentDate,
+          effectiveTimeZone,
+          weekRange.endDate
+        ),
         energyKwh: this.sumEnergyForRange(allRows, weekRange.startDate, weekRange.endDate),
         complete: this.isRangeComplete(allRows, weekRange.startDate, weekRange.endDate)
       },
       currentMonth: {
+        remainingEnergyKwh: this.sumRemainingEnergyForRange(
+          allRows,
+          currentDate,
+          effectiveTimeZone,
+          monthRange.endDate
+        ),
         energyKwh: this.sumEnergyForRange(allRows, monthRange.startDate, monthRange.endDate),
         complete: this.isRangeComplete(allRows, monthRange.startDate, monthRange.endDate)
       }
@@ -133,6 +145,39 @@ class ForecastService {
   }
   sumEnergyForRange(rows, startDate, endDate) {
     const totalEnergy = rows.filter((row) => row.localDate >= startDate && row.localDate <= endDate).reduce((sum, row) => sum + row.energyKwh, 0);
+    return (0, import_dates.roundNumber)(totalEnergy);
+  }
+  sumRemainingEnergyForRange(rows, now, timeZone, endDate) {
+    var _a, _b, _c, _d;
+    const currentTimestamp = `${(0, import_dates.formatLocalDate)(now, timeZone)}T${(0, import_dates.formatLocalHour)(now, timeZone)}`;
+    let startIndex = rows.findIndex((row) => row.timestamp >= currentTimestamp);
+    if (startIndex < 0) {
+      return 0;
+    }
+    const isRepeatedHour = [1, 2].some((hoursAgo) => {
+      const previousHour = new Date(now.getTime() - hoursAgo * 60 * 60 * 1e3);
+      return `${(0, import_dates.formatLocalDate)(previousHour, timeZone)}T${(0, import_dates.formatLocalHour)(previousHour, timeZone)}` === currentTimestamp;
+    });
+    if (isRepeatedHour && rows[startIndex].timestamp === currentTimestamp) {
+      const repeatedIndex = rows.findIndex(
+        (row, index) => index > startIndex && row.timestamp === currentTimestamp
+      );
+      if (repeatedIndex >= 0) {
+        startIndex = repeatedIndex;
+      }
+    }
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone,
+      minute: "2-digit",
+      second: "2-digit"
+    }).formatToParts(now);
+    const minute = Number((_b = (_a = parts.find((part) => part.type === "minute")) == null ? void 0 : _a.value) != null ? _b : 0);
+    const second = Number((_d = (_c = parts.find((part) => part.type === "second")) == null ? void 0 : _c.value) != null ? _d : 0);
+    const remainingFraction = 1 - (minute * 60 + second + now.getUTCMilliseconds() / 1e3) / 3600;
+    const totalEnergy = rows.slice(startIndex).filter((row) => row.localDate <= endDate).reduce(
+      (sum, row, index) => sum + row.energyKwh * (index === 0 && row.timestamp === currentTimestamp ? remainingFraction : 1),
+      0
+    );
     return (0, import_dates.roundNumber)(totalEnergy);
   }
   sumRemainingTodayEnergy(rows, today, currentHour) {

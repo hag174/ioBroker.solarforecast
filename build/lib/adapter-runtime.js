@@ -194,6 +194,14 @@ class AdapterRuntime {
       "kWh"
     );
     await this.ensureState(
+      "summary.currentWeek.remaining_energy",
+      "Remaining energy forecast for the current week",
+      "number",
+      "value.power.consumption",
+      false,
+      "kWh"
+    );
+    await this.ensureState(
       "summary.currentWeek.complete",
       "Current week forecast complete",
       "boolean",
@@ -203,6 +211,14 @@ class AdapterRuntime {
     await this.ensureState(
       "summary.currentMonth.energy_kwh",
       "Current month energy forecast",
+      "number",
+      "value.power.consumption",
+      false,
+      "kWh"
+    );
+    await this.ensureState(
+      "summary.currentMonth.remaining_energy",
+      "Remaining energy forecast for the current month",
       "number",
       "value.power.consumption",
       false,
@@ -296,12 +312,20 @@ class AdapterRuntime {
       val: snapshot.currentWeek.energyKwh,
       ack: true
     });
+    await this.adapter.setStateAsync("summary.currentWeek.remaining_energy", {
+      val: snapshot.currentWeek.remainingEnergyKwh,
+      ack: true
+    });
     await this.adapter.setStateAsync("summary.currentWeek.complete", {
       val: snapshot.currentWeek.complete,
       ack: true
     });
     await this.adapter.setStateAsync("summary.currentMonth.energy_kwh", {
       val: snapshot.currentMonth.energyKwh,
+      ack: true
+    });
+    await this.adapter.setStateAsync("summary.currentMonth.remaining_energy", {
+      val: snapshot.currentMonth.remainingEnergyKwh,
       ack: true
     });
     await this.adapter.setStateAsync("summary.currentMonth.complete", {

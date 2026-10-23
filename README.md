@@ -54,8 +54,10 @@ Each Open-Meteo refresh uses a 30 second request timeout and skips overlapping s
 - `summary.today.energy_kwh`
 - `summary.today.remaining_energy_kwh`
 - `summary.currentWeek.energy_kwh`
+- `summary.currentWeek.remaining_energy`
 - `summary.currentWeek.complete`
 - `summary.currentMonth.energy_kwh`
+- `summary.currentMonth.remaining_energy`
 - `summary.currentMonth.complete`
 - `forecast.daily.day0..day6.date`
 - `forecast.daily.day0..day6.energy_kwh`
@@ -64,6 +66,17 @@ Each Open-Meteo refresh uses a 30 second request timeout and skips overlapping s
 - `forecast.json.hourlyTomorrow`
 - `forecast.json.daily`
 - `forecast.json.summary`
+
+`summary.currentWeek.remaining_energy` is the remaining PV energy forecast in `kWh` from the time of the last successful refresh through Sunday of the current local ISO calendar week, limited to the available forecast.
+It uses the same proportional current-hour calculation as the remaining monthly forecast and can include days in the next calendar month.
+The summary JSON exposes it as `currentWeek.remainingEnergyKwh`. The state uses the role `value.power.consumption` and updates at the configured forecast refresh interval.
+The existing `summary.currentWeek.complete` flag still describes coverage of the entire calendar week.
+
+`summary.currentMonth.remaining_energy` is the remaining PV energy forecast in `kWh` from the time of the last successful refresh through the end of the local calendar month, limited to the available Open-Meteo forecast (16 days including today).
+The current hour is prorated by its remaining time, assuming uniform production within that hour; past hours and next-month hours are excluded.
+Missing future days are not extrapolated. You can add the measured month-to-date PV energy separately in ioBroker.
+The existing `summary.currentMonth.complete` flag still describes coverage of the entire calendar month; the new value is also available as `currentMonth.remainingEnergyKwh` in `forecast.json.summary`.
+The new state uses the role `value.power.consumption` and updates at the configured forecast refresh interval.
 
 The hourly `<key>` is derived from the local timestamp and gains a deterministic suffix when the same local hour occurs twice during the DST fallback change.
 All `*.energy_kwh` states use the ioBroker role `value.power.consumption`.
@@ -94,6 +107,12 @@ Project-specific unit tests live in `Tests/`. Template package and integration t
 - The adapter runtime itself is implemented in TypeScript under `src/`.
 
 ## Changelog
+
+### 0.8.0
+
+- Added `summary.currentWeek.remaining_energy` and `summary.currentMonth.remaining_energy` in kWh, with proportional current-hour energy and local week/month boundaries.
+- Added remaining energy values to the summary JSON so measured PV production can be added separately in ioBroker.
+- Added automatic GitHub releases after successful tagged CI checks.
 
 ### 0.6.0
 

@@ -1,8 +1,21 @@
 {
     "common": {
         "name": "solarforecast",
-        "version": "0.7.0",
+        "version": "0.8.0",
         "news": {
+            "0.8.0": {
+                "en": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
+                "de": "Restenergie-Prognosen für die aktuelle Woche und den aktuellen Monat ergänzt, einschließlich des zeitanteiligen Rests der laufenden Stunde.",
+                "ru": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
+                "pt": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
+                "nl": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
+                "fr": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
+                "it": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
+                "es": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
+                "pl": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
+                "uk": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour.",
+                "zh-cn": "Added remaining energy forecasts for the current week and month, including the proportional remainder of the current hour."
+            },
             "0.7.0": {
                 "en": "Added a configurable refresh interval in minutes and changed the city validation status to a display-only field.",
                 "de": "Konfigurierbares Aktualisierungsintervall in Minuten hinzugefuegt und den Status der Stadtpruefung in ein reines Anzeigefeld umgewandelt.",
@@ -121,8 +134,15 @@
             "uk": "Адаптер сонячного прогнозу для ioBroker з використанням Open-Meteo",
             "zh-cn": "使用 Open-Meteo 的 ioBroker 太阳能预测适配器"
         },
-        "authors": ["Hagen Schweitzer <hagenschweitze@gmx.de>"],
-        "keywords": ["solar", "forecast", "pv", "open-meteo"],
+        "authors": [
+            "Hagen Schweitzer <hagenschweitze@gmx.de>"
+        ],
+        "keywords": [
+            "solar",
+            "forecast",
+            "pv",
+            "open-meteo"
+        ],
         "licenseInformation": {
             "type": "free",
             "license": "MIT"
